@@ -17,6 +17,11 @@ using namespace std;
 
 #include "slic.h"
 
+// usage: ./slic <input image> <# of superpixel>
+// <some constant (typ:100 small:less grid-like large:more grid-like)
+// <output image>
+//
+// example: ./slic dog.png 256 80 result.png
 int main(int argc, char *argv[]) {
     /* Load the image and convert to Lab colour space. */
     IplImage *image = cvLoadImage(argv[1], 1);
