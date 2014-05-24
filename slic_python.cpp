@@ -57,19 +57,16 @@ boost::python::object createPythonNDArrayFromIplImage(const IplImage* image) {
 		.attr("reshape")(shape);
 }
 
-boost::python::object oversegmentate(boost::python::object input) {
-	const int nr_superpixels = 256;
-	const int regularity = 80;
-
+boost::python::object oversegmentate(boost::python::object input, int num_superpixel, int regularity) {
 	IplImage* image_rgb = createIplImageFromPythonNDarray(input);
 	IplImage* image_lab = cvCloneImage(image_rgb);
 	cvCvtColor(image_rgb, image_lab, CV_BGR2Lab);
 
 	Slic slic;
-	const double step = std::sqrt((image_lab->width * image_lab->height) / (double) nr_superpixels);
+	const double step = std::sqrt((image_lab->width * image_lab->height) / (double) num_superpixel);
 	slic.generate_superpixels(image_lab, step, regularity);
 	slic.create_connectivity(image_lab);
-	slic.display_contours(image_rgb, CV_RGB(255,0,0));
+	slic.display_contours(image_rgb, CV_RGB(255, 0, 0));
 	boost::python::object result = createPythonNDArrayFromIplImage(image_rgb);
 	cvReleaseImage(&image_rgb);
 	cvReleaseImage(&image_lab);
@@ -78,5 +75,10 @@ boost::python::object oversegmentate(boost::python::object input) {
 }
 
 BOOST_PYTHON_MODULE(slic) {
-	boost::python::def("oversegmentate", &oversegmentate);
+	boost::python::def("oversegmentate", &oversegmentate,
+		("image", boost::python::arg("num_superpixel")=200, boost::python::arg("regularity")=80),
+		"Calculate superpixels of a RGB image.\n"
+		"* image: numpy array representing RGB image\n"
+		"* num_superpixel: number of superpixels\n"
+		"* regularity: grid-likeness of the superpixels");
 }
